@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Border Control - Biometric Entry System</title>
+  <title>Immigration Control - Biometric Entry System</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
     
@@ -25,12 +25,20 @@
     body {
       font-family: 'Orbitron', monospace;
       display: flex;
-      height: 100vh;
+      flex-direction: row;
+      min-height: 100vh;
       overflow: hidden;
-      background: linear-gradient(135deg, #0c1445, #1a237e);
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
       /* Additional mobile optimizations */
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
+    }
+
+    /* Keep side-by-side layout on tablets, just make more compact */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
     }
 
     #left-side, #right-side {
@@ -40,46 +48,110 @@
       justify-content: center;
       flex-direction: column;
       position: relative;
+      min-height: 100vh;
+      padding: 15px;
+    }
+
+    /* Compact vertical spacing for tablets */
+    @media (max-width: 1200px) {
+      #left-side, #right-side {
+        padding: 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #left-side, #right-side {
+        min-height: 50vh;
+        padding: 10px;
+      }
     }
 
     #left-side {
-      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      background: linear-gradient(135deg, #0f3460, #16213e, #1976d2);
       color: #00e676;
       text-align: center;
-      border-right: 3px solid #00bcd4;
+      border-right: 4px solid #00bcd4;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (max-width: 768px) {
+      #left-side {
+        border-right: none;
+        border-bottom: 4px solid #00bcd4;
+      }
     }
 
     #right-side {
-      background: linear-gradient(135deg, #263238, #37474f);
+      background: linear-gradient(135deg, #263238, #37474f, #455a64);
       color: #00e676;
       position: relative;
       cursor: pointer;
+      overflow: hidden;
     }
 
-    /* International accent bar */
-    .accent-bar {
+    /* Animated accent stripe */
+    .accent-stripe {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       height: 6px;
-      background: linear-gradient(90deg, #0d47a1, #00bcd4, #00e676, #4caf50);
+      background: linear-gradient(90deg, 
+        #1976d2 0%, #1976d2 25%, 
+        #00bcd4 25%, #00bcd4 50%,
+        #00e676 50%, #00e676 75%,
+        #1976d2 75%, #1976d2 100%);
       z-index: 10;
+      animation: accentShimmer 4s ease-in-out infinite;
     }
 
-    /* Scanning Area */
+    @keyframes accentShimmer {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+
+    /* Professional grid background */
+    .tech-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(0, 230, 118, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 230, 118, 0.08) 1px, transparent 1px),
+        linear-gradient(45deg, rgba(0, 188, 212, 0.03) 1px, transparent 1px);
+      background-size: 20px 20px, 20px 20px, 40px 40px;
+      opacity: 0.4;
+      animation: techGridMove 30s linear infinite;
+    }
+
+    @keyframes techGridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(20px, 20px); }
+    }
+
+    /* Nicely sized scanning area for tablets */
     .scan-area {
-      width: 200px;
-      height: 200px;
+      width: min(200px, 38vw);
+      height: min(200px, 38vw);
+      max-width: 240px;
+      max-height: 240px;
       border: 3px solid #00e676;
-      border-radius: 20px;
+      border-radius: 22px;
       position: relative;
-      background: rgba(0, 230, 118, 0.1);
+      background: radial-gradient(circle at center, 
+        rgba(0, 230, 118, 0.15), 
+        rgba(25, 118, 210, 0.1), 
+        rgba(0, 230, 118, 0.05));
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.3s ease;
-      box-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+      transition: all 0.4s ease;
+      box-shadow: 
+        0 0 35px rgba(0, 230, 118, 0.4),
+        inset 0 0 25px rgba(0, 230, 118, 0.1);
       /* Enhanced touch prevention */
       -webkit-user-select: none !important;
       -webkit-touch-callout: none !important;
@@ -87,333 +159,458 @@
       touch-action: manipulation;
     }
 
+    /* Good size for tablets */
+    @media (max-width: 1200px) {
+      .scan-area {
+        width: min(180px, 35vw);
+        height: min(180px, 35vw);
+        max-width: 200px;
+        max-height: 200px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .scan-area {
+        width: min(160px, 42vw);
+        height: min(160px, 42vw);
+        border-width: 3px;
+        border-radius: 18px;
+      }
+    }
+
     .scan-area:hover {
-      box-shadow: 0 0 50px rgba(0, 230, 118, 0.5);
-      background: rgba(0, 230, 118, 0.2);
+      box-shadow: 
+        0 0 55px rgba(0, 230, 118, 0.6),
+        0 0 28px rgba(0, 188, 212, 0.3),
+        inset 0 0 35px rgba(0, 230, 118, 0.15);
+      background: radial-gradient(circle at center, 
+        rgba(0, 230, 118, 0.2), 
+        rgba(25, 118, 210, 0.15), 
+        rgba(0, 188, 212, 0.05));
+      transform: translateY(-1px);
     }
 
     .scan-area.scanning {
-      animation: pulse 0.5s infinite alternate;
-      border-color: #ff5722;
-      box-shadow: 0 0 50px rgba(255, 87, 34, 0.5);
+      animation: professionalPulse 0.6s infinite alternate;
+      border-color: #00bcd4;
+      box-shadow: 
+        0 0 65px rgba(0, 188, 212, 0.8),
+        0 0 35px rgba(0, 230, 118, 0.4),
+        inset 0 0 45px rgba(0, 188, 212, 0.2);
     }
 
     .scan-area.disabled {
       opacity: 0.6;
       cursor: not-allowed;
       border-color: #6b7280;
-      box-shadow: 0 0 15px rgba(107, 114, 128, 0.3);
+      box-shadow: 0 0 18px rgba(107, 114, 128, 0.3);
     }
 
-    @keyframes pulse {
+    @keyframes professionalPulse {
       0% { transform: scale(1); }
-      100% { transform: scale(1.05); }
+      100% { transform: scale(1.04); }
     }
 
-    /* Corner markers for scan area */
+    /* Better corner markers */
     .corner {
       position: absolute;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border: 3px solid #00e676;
+      border-radius: 3px;
+      transition: all 0.3s ease;
       /* Prevent selection on corners */
       -webkit-user-select: none !important;
       -webkit-touch-callout: none !important;
     }
 
+    @media (max-width: 1200px) {
+      .corner {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .corner {
+        width: 18px;
+        height: 18px;
+        border-width: 2px;
+      }
+    }
+
     .corner.top-left {
-      top: -3px;
-      left: -3px;
+      top: -5px;
+      left: -5px;
       border-right: none;
       border-bottom: none;
     }
 
     .corner.top-right {
-      top: -3px;
-      right: -3px;
+      top: -5px;
+      right: -5px;
       border-left: none;
       border-bottom: none;
     }
 
     .corner.bottom-left {
-      bottom: -3px;
-      left: -3px;
+      bottom: -5px;
+      left: -5px;
       border-right: none;
       border-top: none;
     }
 
     .corner.bottom-right {
-      bottom: -3px;
-      right: -3px;
+      bottom: -5px;
+      right: -5px;
       border-left: none;
       border-top: none;
     }
 
-    /* Scanning laser effect */
+    .scan-area.scanning .corner {
+      border-color: #00bcd4;
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
+    }
+
+    /* Laser effect */
     .scan-line {
       position: absolute;
       width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, #ff5722, transparent);
-      top: -10px;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        transparent, 
+        #00bcd4, 
+        #ffffff, 
+        #00bcd4, 
+        transparent);
+      top: -8px;
       opacity: 0;
       transition: all 0.3s ease;
+      border-radius: 1px;
+      box-shadow: 0 0 15px rgba(0, 188, 212, 0.8);
     }
 
     .scan-line.active {
       opacity: 1;
-      animation: scanMove 2s linear infinite;
+      animation: professionalScanMove 2.5s ease-in-out infinite;
     }
 
-    @keyframes scanMove {
-      0% { top: 0; }
-      100% { top: 100%; }
+    @keyframes professionalScanMove {
+      0% { top: 0; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { top: 100%; opacity: 0; }
     }
 
-    /* Instructions */
+    /* Nicely sized instructions */
     .instruction {
-      margin-top: 30px;
-      font-size: 18px;
+      margin-top: 20px;
+      font-size: clamp(14px, 2.2vw, 17px);
       color: #00e676;
       text-align: center;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
     }
 
     .instruction.disabled {
       color: #6b7280;
+      text-shadow: none;
     }
 
-    /* Progress bar - moved higher for tablet compatibility */
+    /* Progress bar */
     #progress-container {
       position: absolute;
-      bottom: 120px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      width: 300px;
+      transform: translate(-50%, 140px);
+      width: min(280px, 72vw);
       height: 8px;
       background: rgba(0, 230, 118, 0.2);
       border-radius: 4px;
       overflow: hidden;
-      border: 1px solid #00e676;
+      border: 2px solid #00e676;
+      box-shadow: 
+        0 0 15px rgba(0, 230, 118, 0.3),
+        inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (max-width: 1200px) {
+      #progress-container {
+        transform: translate(-50%, 130px);
+        width: min(240px, 75vw);
+        height: 7px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #progress-container {
+        transform: translate(-50%, 120px);
+        width: min(220px, 80vw);
+        height: 6px;
+      }
     }
 
     #progress-bar {
       height: 100%;
       width: 0;
       background: linear-gradient(90deg, #00e676, #4caf50);
-      transition: width 3s linear;
-      box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+      transition: width 3s ease-out;
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.6);
+      position: relative;
     }
 
-    /* Left side content */
-    .system-header {
-      font-size: 24px;
-      font-weight: 900;
-      margin-bottom: 20px;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-    }
-
-    .status-display {
-      font-size: 48px;
-      font-weight: 700;
-      margin: 20px 0;
-      text-transform: uppercase;
-      letter-spacing: 4px;
-      text-shadow: 0 0 20px currentColor;
-    }
-
-    #welcome-message {
-      display: none;
-      animation: fadeInScale 1s ease-out;
-      color: #00e676;
-    }
-
-    #fingerprint-display {
-      display: none;
-      width: 180px;
-      height: 280px;
-      margin-top: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 30px rgba(0, 230, 118, 0.5);
-      animation: fadeInScale 1s ease-out 0.5s both;
-      border: 2px solid #00e676;
-      background: rgba(0, 0, 0, 0.3);
-      padding: 10px;
-    }
-
-    @keyframes fadeInScale {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
-    /* Security badge */
-    .security-badge {
-      position: absolute;
-      top: 30px;
-      left: 30px;
-      background: rgba(0, 230, 118, 0.1);
-      border: 2px solid #00e676;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 14px;
-      font-weight: 700;
-      color: #00e676;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* Status indicators */
-    .status-lights {
-      position: absolute;
-      top: 30px;
-      right: 30px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .status-light {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #333;
-      border: 1px solid #555;
-    }
-
-    .status-light.active {
-      background: #00e676;
-      box-shadow: 0 0 10px #00e676;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0.3; }
-    }
-
-    /* Scanner grid background */
-    .scanner-bg {
+    #progress-bar::after {
+      content: '';
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background-image: 
-        linear-gradient(rgba(0, 230, 118, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 230, 118, 0.1) 1px, transparent 1px);
-      background-size: 20px 20px;
-      opacity: 0.3;
+      background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.4), 
+        transparent);
+      animation: professionalShimmer 2s ease-in-out infinite;
     }
 
-    /* Fingerprint placeholder icon */
-    .fingerprint-icon {
-      font-size: 48px;
+    @keyframes professionalShimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Nicely sized left side content */
+    .system-header {
+      font-size: clamp(18px, 3.2vw, 24px);
+      font-weight: 900;
+      margin-bottom: 12px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    }
+
+    .status-display {
+      font-size: clamp(28px, 4.5vw, 36px);
+      font-weight: 700;
+      margin: 12px 0;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 18px currentColor;
+    }
+
+    #welcome-message {
+      display: none;
+      animation: professionalFadeInScale 1.2s ease-out;
       color: #00e676;
-      opacity: 0.7;
+    }
+
+    /* Nicely sized fingerprint display */
+    #fingerprint-display {
+      display: none;
+      width: min(140px, 30vw);
+      height: min(200px, 42vw);
+      margin-top: 15px;
+      border-radius: 15px;
+      box-shadow: 
+        0 0 30px rgba(0, 230, 118, 0.6),
+        0 0 15px rgba(0, 188, 212, 0.3),
+        inset 0 0 20px rgba(0, 230, 118, 0.1);
+      animation: professionalFadeInScale 1.2s ease-out 0.6s both;
+      border: 2px solid #00e676;
+      background: radial-gradient(circle at center, 
+        rgba(0, 0, 0, 0.4), 
+        rgba(25, 118, 210, 0.2));
+      padding: 10px;
+    }
+
+    @media (max-width: 1200px) {
+      #fingerprint-display {
+        width: min(120px, 32vw);
+        height: min(170px, 44vw);
+        margin-top: 12px;
+        padding: 8px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      #fingerprint-display {
+        width: min(100px, 36vw);
+        height: min(140px, 48vw);
+        margin-top: 10px;
+        padding: 6px;
+      }
+    }
+
+    @keyframes professionalFadeInScale {
+      0% {
+        opacity: 0;
+        transform: scale(0.85) rotateY(20deg);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+      }
+    }
+
+    /* Nicely sized security badges */
+    .security-badge {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      background: linear-gradient(135deg, 
+        rgba(0, 230, 118, 0.15), 
+        rgba(25, 118, 210, 0.1));
+      border: 2px solid #00e676;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: clamp(10px, 1.5vw, 12px);
+      font-weight: 700;
+      color: #00e676;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 3px 12px rgba(0, 230, 118, 0.3);
+      text-shadow: 0 0 6px rgba(0, 230, 118, 0.5);
+    }
+
+    /* Nicely sized status indicators */
+    .status-lights {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .status-light {
+      width: clamp(11px, 1.5vw, 13px);
+      height: clamp(11px, 1.5vw, 13px);
+      border-radius: 50%;
+      background: #333;
+      border: 2px solid #555;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+
+    .status-light.active {
+      background: #00e676;
+      border-color: #00e676;
+      box-shadow: 
+        0 0 15px rgba(0, 230, 118, 0.8),
+        inset 0 0 8px rgba(0, 230, 118, 0.3);
+      animation: professionalBlink 2s ease-in-out infinite;
+    }
+
+    .status-light.active::after {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      right: -3px;
+      bottom: -3px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 230, 118, 0.4);
+      animation: professionalRipple 2s ease-in-out infinite;
+    }
+
+    @keyframes professionalBlink {
+      0%, 70% { opacity: 1; }
+      85%, 100% { opacity: 0.4; }
+    }
+
+    @keyframes professionalRipple {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* Nicely sized fingerprint placeholder icon */
+    .fingerprint-icon {
+      font-size: clamp(32px, 4.5vw, 42px);
+      color: #00e676;
+      opacity: 0.8;
+      text-shadow: 0 0 12px rgba(0, 230, 118, 0.6);
       /* Extra prevention for the emoji */
       -webkit-user-select: none !important;
       -webkit-touch-callout: none !important;
       -webkit-tap-highlight-color: transparent !important;
-      pointer-events: none; /* Make it non-interactive */
+      pointer-events: none;
     }
 
-    /* International styling */
-    .system-logo {
-      font-size: 20px;
-      margin-bottom: 10px;
+    /* Nicely sized generic styling */
+    .agency-logo {
+      font-size: clamp(14px, 2.2vw, 17px);
+      margin-bottom: 8px;
       color: #00bcd4;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px rgba(0, 188, 212, 0.6);
     }
 
     .welcome-text {
-      font-size: 16px;
+      font-size: clamp(11px, 1.8vw, 14px);
       color: #ffffff;
-      margin-top: 15px;
-      font-weight: 400;
+      margin-top: 10px;
+      font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
     }
 
-    /* Reset instruction */
+    /* Reset instruction positioned below progress bar */
     .reset-instruction {
       position: absolute;
-      bottom: 170px;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      font-size: 12px;
+      transform: translate(-50%, 180px);
+      font-size: clamp(9px, 1.3vw, 11px);
       color: #6b7280;
       text-align: center;
       display: none;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
     }
 
-    /* Sound control button */
-    .sound-toggle {
-      position: absolute;
-      bottom: 30px;
-      right: 30px;
-      background: rgba(0, 230, 118, 0.1);
-      border: 2px solid #00e676;
-      padding: 8px 12px;
-      border-radius: 8px;
-      color: #00e676;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: all 0.3s ease;
+    @media (max-width: 1200px) {
+      .reset-instruction {
+        transform: translate(-50%, 165px);
+      }
     }
 
-    .sound-toggle:hover {
-      background: rgba(0, 230, 118, 0.2);
-      box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
-    }
-
-    .sound-toggle.muted {
-      opacity: 0.5;
-      border-color: #6b7280;
-      color: #6b7280;
+    @media (max-width: 768px) {
+      .reset-instruction {
+        transform: translate(-50%, 155px);
+      }
     }
   </style>
 </head>
 <body>
   <!-- Left Side: System Display -->
   <div id="left-side">
-    <div class="accent-bar"></div>
-    <div class="scanner-bg"></div>
-    <div class="security-badge">Border Control</div>
+    <div class="accent-stripe"></div>
+    <div class="tech-bg"></div>
+    <div class="security-badge">🛡️ Immigration Control</div>
     <div class="status-lights">
       <div class="status-light" id="light1"></div>
       <div class="status-light" id="light2"></div>
       <div class="status-light" id="light3"></div>
     </div>
     
-    <div class="system-logo">🛂 IMMIGRATION</div>
-    <div class="system-header">BORDER CONTROL</div>
+    <div class="agency-logo">🌐 BORDER CONTROL</div>
+    <div class="system-header">IMMIGRATION</div>
     <div class="status-display" id="status-text">READY</div>
     <div class="status-display" id="welcome-message">ACCESS<br>GRANTED</div>
-    <div class="welcome-text" id="welcome-text" style="display: none;">Identity Verified - Proceed</div>
+    <div class="welcome-text" id="welcome-text" style="display: none;">Entry Authorized</div>
     <div id="fingerprint-display"></div>
   </div>
 
   <!-- Right Side: Fingerprint Scanner -->
   <div id="right-side">
-    <div class="accent-bar"></div>
-    <div class="scanner-bg"></div>
-    <div class="security-badge">Biometric Scanner</div>
-    <div class="sound-toggle" id="sound-toggle">🔊 SOUND</div>
+    <div class="accent-stripe"></div>
+    <div class="tech-bg"></div>
+    <div class="security-badge">🔬 Biometric Terminal</div>
     
     <div class="scan-area" id="scan-area">
       <div class="corner top-left"></div>
@@ -421,7 +618,7 @@
       <div class="corner bottom-left"></div>
       <div class="corner bottom-right"></div>
       <div class="scan-line" id="scan-line"></div>
-      <div class="fingerprint-icon">👆</div>
+      <div class="fingerprint-icon">👆🏼</div>
     </div>
     
     <div class="instruction" id="instruction-text">Place finger on scanner</div>
@@ -442,15 +639,13 @@
     const statusText = document.getElementById('status-text');
     const instructionText = document.getElementById('instruction-text');
     const resetInstruction = document.getElementById('reset-instruction');
-    const soundToggle = document.getElementById('sound-toggle');
     const lights = [
       document.getElementById('light1'),
       document.getElementById('light2'),
       document.getElementById('light3')
     ];
 
-    // Sound and vibration control
-    let soundEnabled = true;
+    // Sound control - automatically enabled
     let audioContext;
     
     // Initialize audio context on first user interaction
@@ -462,7 +657,7 @@
 
     // Create professional scanner activation sound
     function playActivationSound() {
-      if (!soundEnabled || !audioContext) return;
+      if (!audioContext) return;
       
       // Deep, professional activation tone
       const oscillator = audioContext.createOscillator();
@@ -486,9 +681,9 @@
       oscillator.stop(audioContext.currentTime + 0.3);
     }
 
-    // Create scanning drone sound (continuous low hum)
+    // Create pure low-frequency machine hum
     function createScanningDrone() {
-      if (!soundEnabled || !audioContext) return null;
+      if (!audioContext) return null;
       
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -498,22 +693,22 @@
       filter.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      oscillator.frequency.value = 80;
+      oscillator.frequency.value = 78;
       oscillator.type = 'sawtooth';
       
       filter.type = 'lowpass';
-      filter.frequency.value = 200;
+      filter.frequency.value = 160;
       
-      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gainNode.gain.setValueAtTime(0.06, audioContext.currentTime);
       
       oscillator.start(audioContext.currentTime);
       
       return { oscillator, gainNode };
     }
 
-    // Create data processing blips
-    function playDataBlip(frequency = 1200) {
-      if (!soundEnabled || !audioContext) return;
+    // Subtle data processing clicks
+    function playDataClick() {
+      if (!audioContext) return;
       
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -523,65 +718,79 @@
       filter.connect(gainNode);
       gainNode.connect(audioContext.destination);
       
-      oscillator.frequency.value = frequency;
-      oscillator.type = 'square';
+      oscillator.frequency.value = 1100;
+      oscillator.type = 'sine';
       
       filter.type = 'bandpass';
-      filter.frequency.value = frequency;
-      filter.Q.value = 10;
+      filter.frequency.value = 1100;
+      filter.Q.value = 3;
       
-      gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+      gainNode.gain.setValueAtTime(0.08, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.06);
       
       oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.08);
+      oscillator.stop(audioContext.currentTime + 0.06);
     }
 
-    // Create professional success sound
+    // Clear, pleasant confirmation sound
     function playSuccessSound() {
-      if (!soundEnabled || !audioContext) return;
+      if (!audioContext) return;
       
-      // Ascending professional confirmation tone
-      const oscillator1 = audioContext.createOscillator();
-      const oscillator2 = audioContext.createOscillator();
-      const gainNode1 = audioContext.createGain();
-      const gainNode2 = audioContext.createGain();
+      const osc1 = audioContext.createOscillator();
+      const osc2 = audioContext.createOscillator();
+      const osc3 = audioContext.createOscillator();
+      
+      const gain1 = audioContext.createGain();
+      const gain2 = audioContext.createGain();
+      const gain3 = audioContext.createGain();
+      
       const masterGain = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
       
-      oscillator1.connect(gainNode1);
-      oscillator2.connect(gainNode2);
-      gainNode1.connect(masterGain);
-      gainNode2.connect(masterGain);
+      osc1.connect(gain1);
+      osc2.connect(gain2);
+      osc3.connect(gain3);
+      
+      gain1.connect(filter);
+      gain2.connect(filter);
+      gain3.connect(filter);
+      
+      filter.connect(masterGain);
       masterGain.connect(audioContext.destination);
       
-      // Two-tone confirmation
-      oscillator1.frequency.setValueAtTime(300, audioContext.currentTime);
-      oscillator1.frequency.exponentialRampToValueAtTime(450, audioContext.currentTime + 0.4);
+      osc1.frequency.value = 523.25; // C5
+      osc2.frequency.value = 659.25; // E5
+      osc3.frequency.value = 783.99; // G5
       
-      oscillator2.frequency.setValueAtTime(400, audioContext.currentTime + 0.1);
-      oscillator2.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.5);
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc3.type = 'sine';
       
-      oscillator1.type = 'sine';
-      oscillator2.type = 'sine';
+      filter.type = 'lowpass';
+      filter.frequency.value = 2000;
       
-      gainNode1.gain.setValueAtTime(0.2, audioContext.currentTime);
-      gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+      gain1.gain.setValueAtTime(0.15, audioContext.currentTime);
+      gain2.gain.setValueAtTime(0.12, audioContext.currentTime);
+      gain3.gain.setValueAtTime(0.10, audioContext.currentTime);
       
-      gainNode2.gain.setValueAtTime(0.15, audioContext.currentTime + 0.1);
-      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      gain1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+      gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+      gain3.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
       
-      masterGain.gain.setValueAtTime(0.8, audioContext.currentTime);
+      masterGain.gain.setValueAtTime(0.6, audioContext.currentTime);
       
-      oscillator1.start(audioContext.currentTime);
-      oscillator1.stop(audioContext.currentTime + 0.4);
+      osc1.start(audioContext.currentTime);
+      osc2.start(audioContext.currentTime);
+      osc3.start(audioContext.currentTime);
       
-      oscillator2.start(audioContext.currentTime + 0.1);
-      oscillator2.stop(audioContext.currentTime + 0.5);
+      osc1.stop(audioContext.currentTime + 0.8);
+      osc2.stop(audioContext.currentTime + 0.8);
+      osc3.stop(audioContext.currentTime + 0.8);
     }
 
     // Create system reset sound
     function playResetSound() {
-      if (!soundEnabled || !audioContext) return;
+      if (!audioContext) return;
       
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
@@ -608,39 +817,27 @@
       }
     }
 
-    // Sound toggle functionality
-    soundToggle.addEventListener('click', function() {
-      soundEnabled = !soundEnabled;
-      if (soundEnabled) {
-        soundToggle.textContent = '🔊 SOUND';
-        soundToggle.classList.remove('muted');
-        initAudio();
-        playActivationSound(); // Test sound
-      } else {
-        soundToggle.textContent = '🔇 MUTED';
-        soundToggle.classList.add('muted');
-      }
-    });
-
-    // Clean oval fingerprint pattern
-    const standardFingerprint = `<svg width="160" height="260" viewBox="0 0 160 260" xmlns="http://www.w3.org/2000/svg">
-      <defs><style>.fp{fill:none;stroke:#00e676;stroke-width:2;stroke-linecap:round;opacity:0.85;}</style></defs>
-      <g transform="translate(80,130)">
-        <!-- Simple concentric oval patterns -->
-        <ellipse class="fp" cx="0" cy="0" rx="70" ry="115"/>
-        <ellipse class="fp" cx="0" cy="0" rx="65" ry="107"/>
-        <ellipse class="fp" cx="0" cy="0" rx="60" ry="99"/>
-        <ellipse class="fp" cx="0" cy="0" rx="55" ry="91"/>
-        <ellipse class="fp" cx="0" cy="0" rx="50" ry="83"/>
-        <ellipse class="fp" cx="0" cy="0" rx="45" ry="75"/>
-        <ellipse class="fp" cx="0" cy="0" rx="40" ry="67"/>
-        <ellipse class="fp" cx="0" cy="0" rx="35" ry="59"/>
-        <ellipse class="fp" cx="0" cy="0" rx="30" ry="51"/>
-        <ellipse class="fp" cx="0" cy="0" rx="25" ry="43"/>
-        <ellipse class="fp" cx="0" cy="0" rx="20" ry="35"/>
-        <ellipse class="fp" cx="0" cy="0" rx="15" ry="27"/>
-        <ellipse class="fp" cx="0" cy="0" rx="10" ry="19"/>
-        <ellipse class="fp" cx="0" cy="0" rx="6" ry="13"/>
+    // Professional fingerprint pattern
+    const professionalFingerprint = `<svg width="100%" height="100%" viewBox="0 0 160 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <style>
+          .fp{fill:none;stroke:#00e676;stroke-width:2;stroke-linecap:round;opacity:0.9;}
+        </style>
+      </defs>
+      <g transform="translate(80,110)">
+        <ellipse class="fp" cx="0" cy="0" rx="60" ry="100"/>
+        <ellipse class="fp" cx="0" cy="0" rx="55" ry="92"/>
+        <ellipse class="fp" cx="0" cy="0" rx="50" ry="84"/>
+        <ellipse class="fp" cx="0" cy="0" rx="45" ry="76"/>
+        <ellipse class="fp" cx="0" cy="0" rx="40" ry="68"/>
+        <ellipse class="fp" cx="0" cy="0" rx="35" ry="60"/>
+        <ellipse class="fp" cx="0" cy="0" rx="30" ry="52"/>
+        <ellipse class="fp" cx="0" cy="0" rx="25" ry="44"/>
+        <ellipse class="fp" cx="0" cy="0" rx="20" ry="36"/>
+        <ellipse class="fp" cx="0" cy="0" rx="15" ry="28"/>
+        <ellipse class="fp" cx="0" cy="0" rx="12" ry="22"/>
+        <ellipse class="fp" cx="0" cy="0" rx="8" ry="16"/>
+        <ellipse class="fp" cx="0" cy="0" rx="5" ry="12"/>
         <ellipse class="fp" cx="0" cy="0" rx="3" ry="8"/>
       </g>
     </svg>`;
@@ -663,25 +860,23 @@
       // Professional activation sound
       playActivationSound();
       
-      // Start continuous scanning drone
+      // Start machine hum
       scanningDrone = createScanningDrone();
       
-      // Vibration: Professional pulse
-      vibrateDevice([100]);
+      // Professional vibration pattern
+      vibrateDevice([120]);
       
       // Add scanning effects
       scanArea.classList.add('scanning');
       scanLine.classList.add('active');
       
-      // Activate status lights sequentially with data processing sounds
+      // Activate status lights sequentially
       lights.forEach((light, index) => {
         setTimeout(() => {
           light.classList.add('active');
-          // Data processing blips with varying frequencies
-          playDataBlip(1000 + (index * 200));
-          // Subtle vibration
-          vibrateDevice([25]);
-        }, index * 300);
+          playDataClick();
+          vibrateDevice([30]);
+        }, index * 350);
       });
 
       // Reset progress bar
@@ -692,14 +887,14 @@
         progressBar.style.width = '100%';
       }, 100);
 
-      // Random data processing sounds during scan
+      // Occasional data processing clicks during scan
       const dataInterval = setInterval(() => {
         if (isScanning) {
-          playDataBlip(800 + Math.random() * 600);
+          playDataClick();
         } else {
           clearInterval(dataInterval);
         }
-      }, 600);
+      }, 800);
 
       // Complete scan after 3 seconds
       timer = setTimeout(() => {
@@ -709,23 +904,23 @@
     }
 
     function completeScan() {
-      // Stop scanning drone
+      // Stop scanning drone gracefully
       if (scanningDrone) {
-        scanningDrone.gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-        scanningDrone.oscillator.stop(audioContext.currentTime + 0.2);
+        scanningDrone.gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        scanningDrone.oscillator.stop(audioContext.currentTime + 0.3);
         scanningDrone = null;
       }
       
-      // Use the clean oval fingerprint
-      fingerprintDisplay.innerHTML = standardFingerprint;
+      // Use the professional fingerprint
+      fingerprintDisplay.innerHTML = professionalFingerprint;
       
-      // Professional success sound
+      // Success sound
       setTimeout(() => {
         playSuccessSound();
       }, 200);
       
       // Success vibration pattern
-      vibrateDevice([150, 50, 150]);
+      vibrateDevice([200, 50, 200]);
       
       // Show success state
       statusText.style.display = 'none';
@@ -764,7 +959,7 @@
       
       // Professional reset sound
       playResetSound();
-      vibrateDevice([80]);
+      vibrateDevice([90]);
       
       // Re-enable scanner
       scanArea.classList.remove('disabled');
