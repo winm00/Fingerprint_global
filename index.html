@@ -357,6 +357,35 @@
       text-transform: uppercase;
       letter-spacing: 1px;
     }
+
+    /* Sound control button */
+    .sound-toggle {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(0, 230, 118, 0.1);
+      border: 2px solid #00e676;
+      padding: 8px 12px;
+      border-radius: 8px;
+      color: #00e676;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .sound-toggle:hover {
+      background: rgba(0, 230, 118, 0.2);
+      box-shadow: 0 0 15px rgba(0, 230, 118, 0.3);
+    }
+
+    .sound-toggle.muted {
+      opacity: 0.5;
+      border-color: #6b7280;
+      color: #6b7280;
+    }
   </style>
 </head>
 <body>
@@ -384,6 +413,7 @@
     <div class="accent-bar"></div>
     <div class="scanner-bg"></div>
     <div class="security-badge">Biometric Scanner</div>
+    <div class="sound-toggle" id="sound-toggle">🔊 SOUND</div>
     
     <div class="scan-area" id="scan-area">
       <div class="corner top-left"></div>
@@ -412,13 +442,187 @@
     const statusText = document.getElementById('status-text');
     const instructionText = document.getElementById('instruction-text');
     const resetInstruction = document.getElementById('reset-instruction');
+    const soundToggle = document.getElementById('sound-toggle');
     const lights = [
       document.getElementById('light1'),
       document.getElementById('light2'),
       document.getElementById('light3')
     ];
 
-    // Clean oval fingerprint pattern - just concentric ovals
+    // Sound and vibration control
+    let soundEnabled = true;
+    let audioContext;
+    
+    // Initialize audio context on first user interaction
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Create professional scanner activation sound
+    function playActivationSound() {
+      if (!soundEnabled || !audioContext) return;
+      
+      // Deep, professional activation tone
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(150, audioContext.currentTime + 0.3);
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 800;
+      
+      gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    // Create scanning drone sound (continuous low hum)
+    function createScanningDrone() {
+      if (!soundEnabled || !audioContext) return null;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 80;
+      oscillator.type = 'sawtooth';
+      
+      filter.type = 'lowpass';
+      filter.frequency.value = 200;
+      
+      gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+      
+      oscillator.start(audioContext.currentTime);
+      
+      return { oscillator, gainNode };
+    }
+
+    // Create data processing blips
+    function playDataBlip(frequency = 1200) {
+      if (!soundEnabled || !audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      const filter = audioContext.createBiquadFilter();
+      
+      oscillator.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'square';
+      
+      filter.type = 'bandpass';
+      filter.frequency.value = frequency;
+      filter.Q.value = 10;
+      
+      gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.08);
+    }
+
+    // Create professional success sound
+    function playSuccessSound() {
+      if (!soundEnabled || !audioContext) return;
+      
+      // Ascending professional confirmation tone
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode1 = audioContext.createGain();
+      const gainNode2 = audioContext.createGain();
+      const masterGain = audioContext.createGain();
+      
+      oscillator1.connect(gainNode1);
+      oscillator2.connect(gainNode2);
+      gainNode1.connect(masterGain);
+      gainNode2.connect(masterGain);
+      masterGain.connect(audioContext.destination);
+      
+      // Two-tone confirmation
+      oscillator1.frequency.setValueAtTime(300, audioContext.currentTime);
+      oscillator1.frequency.exponentialRampToValueAtTime(450, audioContext.currentTime + 0.4);
+      
+      oscillator2.frequency.setValueAtTime(400, audioContext.currentTime + 0.1);
+      oscillator2.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.5);
+      
+      oscillator1.type = 'sine';
+      oscillator2.type = 'sine';
+      
+      gainNode1.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode1.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+      
+      gainNode2.gain.setValueAtTime(0.15, audioContext.currentTime + 0.1);
+      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+      
+      masterGain.gain.setValueAtTime(0.8, audioContext.currentTime);
+      
+      oscillator1.start(audioContext.currentTime);
+      oscillator1.stop(audioContext.currentTime + 0.4);
+      
+      oscillator2.start(audioContext.currentTime + 0.1);
+      oscillator2.stop(audioContext.currentTime + 0.5);
+    }
+
+    // Create system reset sound
+    function playResetSound() {
+      if (!soundEnabled || !audioContext) return;
+      
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(300, audioContext.currentTime + 0.2);
+      
+      oscillator.type = 'triangle';
+      
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
+    // Vibration patterns
+    function vibrateDevice(pattern) {
+      if (navigator.vibrate) {
+        navigator.vibrate(pattern);
+      }
+    }
+
+    // Sound toggle functionality
+    soundToggle.addEventListener('click', function() {
+      soundEnabled = !soundEnabled;
+      if (soundEnabled) {
+        soundToggle.textContent = '🔊 SOUND';
+        soundToggle.classList.remove('muted');
+        initAudio();
+        playActivationSound(); // Test sound
+      } else {
+        soundToggle.textContent = '🔇 MUTED';
+        soundToggle.classList.add('muted');
+      }
+    });
+
+    // Clean oval fingerprint pattern
     const standardFingerprint = `<svg width="160" height="260" viewBox="0 0 160 260" xmlns="http://www.w3.org/2000/svg">
       <defs><style>.fp{fill:none;stroke:#00e676;stroke-width:2;stroke-linecap:round;opacity:0.85;}</style></defs>
       <g transform="translate(80,130)">
@@ -444,22 +648,39 @@
     let timer;
     let isScanning = false;
     let isWelcomeShown = false;
+    let scanningDrone = null;
 
     function startScanning() {
       if (isScanning || isWelcomeShown) return;
+      
+      // Initialize audio on first interaction
+      initAudio();
       
       isScanning = true;
       statusText.textContent = 'SCANNING...';
       statusText.style.color = '#ff5722';
       
+      // Professional activation sound
+      playActivationSound();
+      
+      // Start continuous scanning drone
+      scanningDrone = createScanningDrone();
+      
+      // Vibration: Professional pulse
+      vibrateDevice([100]);
+      
       // Add scanning effects
       scanArea.classList.add('scanning');
       scanLine.classList.add('active');
       
-      // Activate status lights sequentially
+      // Activate status lights sequentially with data processing sounds
       lights.forEach((light, index) => {
         setTimeout(() => {
           light.classList.add('active');
+          // Data processing blips with varying frequencies
+          playDataBlip(1000 + (index * 200));
+          // Subtle vibration
+          vibrateDevice([25]);
         }, index * 300);
       });
 
@@ -471,15 +692,40 @@
         progressBar.style.width = '100%';
       }, 100);
 
+      // Random data processing sounds during scan
+      const dataInterval = setInterval(() => {
+        if (isScanning) {
+          playDataBlip(800 + Math.random() * 600);
+        } else {
+          clearInterval(dataInterval);
+        }
+      }, 600);
+
       // Complete scan after 3 seconds
       timer = setTimeout(() => {
+        clearInterval(dataInterval);
         completeScan();
       }, 3000);
     }
 
     function completeScan() {
+      // Stop scanning drone
+      if (scanningDrone) {
+        scanningDrone.gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        scanningDrone.oscillator.stop(audioContext.currentTime + 0.2);
+        scanningDrone = null;
+      }
+      
       // Use the clean oval fingerprint
       fingerprintDisplay.innerHTML = standardFingerprint;
+      
+      // Professional success sound
+      setTimeout(() => {
+        playSuccessSound();
+      }, 200);
+      
+      // Success vibration pattern
+      vibrateDevice([150, 50, 150]);
       
       // Show success state
       statusText.style.display = 'none';
@@ -516,6 +762,10 @@
       fingerprintDisplay.innerHTML = '';
       progressBar.style.width = '0';
       
+      // Professional reset sound
+      playResetSound();
+      vibrateDevice([80]);
+      
       // Re-enable scanner
       scanArea.classList.remove('disabled');
       instructionText.textContent = 'Place finger on scanner';
@@ -529,6 +779,13 @@
 
     function cancelScanning() {
       if (!isScanning || isWelcomeShown) return;
+      
+      // Stop scanning drone
+      if (scanningDrone) {
+        scanningDrone.gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        scanningDrone.oscillator.stop(audioContext.currentTime + 0.1);
+        scanningDrone = null;
+      }
       
       clearTimeout(timer);
       isScanning = false;
