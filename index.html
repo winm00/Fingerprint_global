@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Border Control - Biometric Entry System</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      /* Prevent text selection on all elements */
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      /* Prevent touch callouts */
+      -webkit-touch-callout: none;
+      /* Prevent tap highlight */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Orbitron', monospace;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0c1445, #1a237e);
+      /* Additional mobile optimizations */
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
+    }
+
+    #left-side, #right-side {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      position: relative;
+    }
+
+    #left-side {
+      background: linear-gradient(135deg, #0d47a1, #1565c0);
+      color: #00e676;
+      text-align: center;
+      border-right: 3px solid #00bcd4;
+    }
+
+    #right-side {
+      background: linear-gradient(135deg, #263238, #37474f);
+      color: #00e676;
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* International accent bar */
+    .accent-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #0d47a1, #00bcd4, #00e676, #4caf50);
+      z-index: 10;
+    }
+
+    /* Scanning Area */
+    .scan-area {
+      width: 200px;
+      height: 200px;
+      border: 3px solid #00e676;
+      border-radius: 20px;
+      position: relative;
+      background: rgba(0, 230, 118, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.3);
+      /* Enhanced touch prevention */
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      touch-action: manipulation;
+    }
+
+    .scan-area:hover {
+      box-shadow: 0 0 50px rgba(0, 230, 118, 0.5);
+      background: rgba(0, 230, 118, 0.2);
+    }
+
+    .scan-area.scanning {
+      animation: pulse 0.5s infinite alternate;
+      border-color: #ff5722;
+      box-shadow: 0 0 50px rgba(255, 87, 34, 0.5);
+    }
+
+    .scan-area.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      border-color: #6b7280;
+      box-shadow: 0 0 15px rgba(107, 114, 128, 0.3);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+
+    /* Corner markers for scan area */
+    .corner {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #00e676;
+      /* Prevent selection on corners */
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+    }
+
+    .corner.top-left {
+      top: -3px;
+      left: -3px;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner.top-right {
+      top: -3px;
+      right: -3px;
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner.bottom-left {
+      bottom: -3px;
+      left: -3px;
+      border-right: none;
+      border-top: none;
+    }
+
+    .corner.bottom-right {
+      bottom: -3px;
+      right: -3px;
+      border-left: none;
+      border-top: none;
+    }
+
+    /* Scanning laser effect */
+    .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff5722, transparent);
+      top: -10px;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .scan-line.active {
+      opacity: 1;
+      animation: scanMove 2s linear infinite;
+    }
+
+    @keyframes scanMove {
+      0% { top: 0; }
+      100% { top: 100%; }
+    }
+
+    /* Instructions */
+    .instruction {
+      margin-top: 30px;
+      font-size: 18px;
+      color: #00e676;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .instruction.disabled {
+      color: #6b7280;
+    }
+
+    /* Progress bar - moved higher for tablet compatibility */
+    #progress-container {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 300px;
+      height: 8px;
+      background: rgba(0, 230, 118, 0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      border: 1px solid #00e676;
+    }
+
+    #progress-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, #00e676, #4caf50);
+      transition: width 3s linear;
+      box-shadow: 0 0 10px rgba(0, 230, 118, 0.5);
+    }
+
+    /* Left side content */
+    .system-header {
+      font-size: 24px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+    }
+
+    .status-display {
+      font-size: 48px;
+      font-weight: 700;
+      margin: 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px currentColor;
+    }
+
+    #welcome-message {
+      display: none;
+      animation: fadeInScale 1s ease-out;
+      color: #00e676;
+    }
+
+    #fingerprint-display {
+      display: none;
+      width: 180px;
+      height: 280px;
+      margin-top: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 30px rgba(0, 230, 118, 0.5);
+      animation: fadeInScale 1s ease-out 0.5s both;
+      border: 2px solid #00e676;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+    }
+
+    @keyframes fadeInScale {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Security badge */
+    .security-badge {
+      position: absolute;
+      top: 30px;
+      left: 30px;
+      background: rgba(0, 230, 118, 0.1);
+      border: 2px solid #00e676;
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #00e676;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Status indicators */
+    .status-lights {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .status-light {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #333;
+      border: 1px solid #555;
+    }
+
+    .status-light.active {
+      background: #00e676;
+      box-shadow: 0 0 10px #00e676;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    /* Scanner grid background */
+    .scanner-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        linear-gradient(rgba(0, 230, 118, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 230, 118, 0.1) 1px, transparent 1px);
+      background-size: 20px 20px;
+      opacity: 0.3;
+    }
+
+    /* Fingerprint placeholder icon */
+    .fingerprint-icon {
+      font-size: 48px;
+      color: #00e676;
+      opacity: 0.7;
+      /* Extra prevention for the emoji */
+      -webkit-user-select: none !important;
+      -webkit-touch-callout: none !important;
+      -webkit-tap-highlight-color: transparent !important;
+      pointer-events: none; /* Make it non-interactive */
+    }
+
+    /* International styling */
+    .system-logo {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #00bcd4;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .welcome-text {
+      font-size: 16px;
+      color: #ffffff;
+      margin-top: 15px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Reset instruction */
+    .reset-instruction {
+      position: absolute;
+      bottom: 170px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+      display: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Left Side: System Display -->
+  <div id="left-side">
+    <div class="accent-bar"></div>
+    <div class="scanner-bg"></div>
+    <div class="security-badge">Border Control</div>
+    <div class="status-lights">
+      <div class="status-light" id="light1"></div>
+      <div class="status-light" id="light2"></div>
+      <div class="status-light" id="light3"></div>
+    </div>
+    
+    <div class="system-logo">🛂 IMMIGRATION</div>
+    <div class="system-header">BORDER CONTROL</div>
+    <div class="status-display" id="status-text">READY</div>
+    <div class="status-display" id="welcome-message">ACCESS<br>GRANTED</div>
+    <div class="welcome-text" id="welcome-text" style="display: none;">Identity Verified - Proceed</div>
+    <div id="fingerprint-display"></div>
+  </div>
+
+  <!-- Right Side: Fingerprint Scanner -->
+  <div id="right-side">
+    <div class="accent-bar"></div>
+    <div class="scanner-bg"></div>
+    <div class="security-badge">Biometric Scanner</div>
+    
+    <div class="scan-area" id="scan-area">
+      <div class="corner top-left"></div>
+      <div class="corner top-right"></div>
+      <div class="corner bottom-left"></div>
+      <div class="corner bottom-right"></div>
+      <div class="scan-line" id="scan-line"></div>
+      <div class="fingerprint-icon">👆</div>
+    </div>
+    
+    <div class="instruction" id="instruction-text">Place finger on scanner</div>
+    <div class="reset-instruction" id="reset-instruction">Scan another finger to continue</div>
+    
+    <div id="progress-container">
+      <div id="progress-bar"></div>
+    </div>
+  </div>
+
+  <script>
+    const scanArea = document.getElementById('scan-area');
+    const welcomeMessage = document.getElementById('welcome-message');
+    const welcomeText = document.getElementById('welcome-text');
+    const fingerprintDisplay = document.getElementById('fingerprint-display');
+    const progressBar = document.getElementById('progress-bar');
+    const scanLine = document.getElementById('scan-line');
+    const statusText = document.getElementById('status-text');
+    const instructionText = document.getElementById('instruction-text');
+    const resetInstruction = document.getElementById('reset-instruction');
+    const lights = [
+      document.getElementById('light1'),
+      document.getElementById('light2'),
+      document.getElementById('light3')
+    ];
+
+    // Clean oval fingerprint pattern - just concentric ovals
+    const standardFingerprint = `<svg width="160" height="260" viewBox="0 0 160 260" xmlns="http://www.w3.org/2000/svg">
+      <defs><style>.fp{fill:none;stroke:#00e676;stroke-width:2;stroke-linecap:round;opacity:0.85;}</style></defs>
+      <g transform="translate(80,130)">
+        <!-- Simple concentric oval patterns -->
+        <ellipse class="fp" cx="0" cy="0" rx="70" ry="115"/>
+        <ellipse class="fp" cx="0" cy="0" rx="65" ry="107"/>
+        <ellipse class="fp" cx="0" cy="0" rx="60" ry="99"/>
+        <ellipse class="fp" cx="0" cy="0" rx="55" ry="91"/>
+        <ellipse class="fp" cx="0" cy="0" rx="50" ry="83"/>
+        <ellipse class="fp" cx="0" cy="0" rx="45" ry="75"/>
+        <ellipse class="fp" cx="0" cy="0" rx="40" ry="67"/>
+        <ellipse class="fp" cx="0" cy="0" rx="35" ry="59"/>
+        <ellipse class="fp" cx="0" cy="0" rx="30" ry="51"/>
+        <ellipse class="fp" cx="0" cy="0" rx="25" ry="43"/>
+        <ellipse class="fp" cx="0" cy="0" rx="20" ry="35"/>
+        <ellipse class="fp" cx="0" cy="0" rx="15" ry="27"/>
+        <ellipse class="fp" cx="0" cy="0" rx="10" ry="19"/>
+        <ellipse class="fp" cx="0" cy="0" rx="6" ry="13"/>
+        <ellipse class="fp" cx="0" cy="0" rx="3" ry="8"/>
+      </g>
+    </svg>`;
+
+    let timer;
+    let isScanning = false;
+    let isWelcomeShown = false;
+
+    function startScanning() {
+      if (isScanning || isWelcomeShown) return;
+      
+      isScanning = true;
+      statusText.textContent = 'SCANNING...';
+      statusText.style.color = '#ff5722';
+      
+      // Add scanning effects
+      scanArea.classList.add('scanning');
+      scanLine.classList.add('active');
+      
+      // Activate status lights sequentially
+      lights.forEach((light, index) => {
+        setTimeout(() => {
+          light.classList.add('active');
+        }, index * 300);
+      });
+
+      // Reset progress bar
+      progressBar.style.width = '0';
+      
+      // Start progress bar animation
+      setTimeout(() => {
+        progressBar.style.width = '100%';
+      }, 100);
+
+      // Complete scan after 3 seconds
+      timer = setTimeout(() => {
+        completeScan();
+      }, 3000);
+    }
+
+    function completeScan() {
+      // Use the clean oval fingerprint
+      fingerprintDisplay.innerHTML = standardFingerprint;
+      
+      // Show success state
+      statusText.style.display = 'none';
+      welcomeMessage.style.display = 'block';
+      welcomeText.style.display = 'block';
+      fingerprintDisplay.style.display = 'block';
+      
+      // Stop scanning effects
+      scanArea.classList.remove('scanning');
+      scanLine.classList.remove('active');
+      
+      // Disable scanner and show reset instruction
+      isWelcomeShown = true;
+      scanArea.classList.add('disabled');
+      instructionText.textContent = 'System ready for next scan';
+      instructionText.classList.add('disabled');
+      resetInstruction.style.display = 'block';
+      
+      // Keep all status lights on
+      lights.forEach(light => {
+        light.classList.add('active');
+      });
+    }
+
+    function resetSystem() {
+      isScanning = false;
+      isWelcomeShown = false;
+      statusText.style.display = 'block';
+      statusText.textContent = 'READY';
+      statusText.style.color = '#00e676';
+      welcomeMessage.style.display = 'none';
+      welcomeText.style.display = 'none';
+      fingerprintDisplay.style.display = 'none';
+      fingerprintDisplay.innerHTML = '';
+      progressBar.style.width = '0';
+      
+      // Re-enable scanner
+      scanArea.classList.remove('disabled');
+      instructionText.textContent = 'Place finger on scanner';
+      instructionText.classList.remove('disabled');
+      resetInstruction.style.display = 'none';
+      
+      lights.forEach(light => {
+        light.classList.remove('active');
+      });
+    }
+
+    function cancelScanning() {
+      if (!isScanning || isWelcomeShown) return;
+      
+      clearTimeout(timer);
+      isScanning = false;
+      
+      scanArea.classList.remove('scanning');
+      scanLine.classList.remove('active');
+      progressBar.style.width = '0';
+      statusText.textContent = 'READY';
+      statusText.style.color = '#00e676';
+      
+      lights.forEach(light => {
+        light.classList.remove('active');
+      });
+    }
+
+    // Prevent all context menus and text selection globally
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    document.addEventListener('selectstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    document.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+
+    // Enhanced event listeners with better touch handling
+    scanArea.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      if (isWelcomeShown) {
+        resetSystem();
+      } else {
+        startScanning();
+      }
+    }, { passive: false });
+
+    scanArea.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      if (isWelcomeShown) {
+        resetSystem();
+      } else {
+        startScanning();
+      }
+    });
+
+    scanArea.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      cancelScanning();
+    }, { passive: false });
+
+    scanArea.addEventListener('mouseup', function(e) {
+      e.preventDefault();
+      cancelScanning();
+    });
+
+    scanArea.addEventListener('touchcancel', function(e) {
+      e.preventDefault();
+      cancelScanning();
+    }, { passive: false });
+
+    scanArea.addEventListener('mouseleave', cancelScanning);
+
+    // Prevent context menu specifically on scan area
+    scanArea.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    });
+
+    // Additional prevention for long press
+    let longPressTimer;
+    scanArea.addEventListener('touchstart', function(e) {
+      longPressTimer = setTimeout(function() {
+        if (window.getSelection) {
+          window.getSelection().removeAllRanges();
+        }
+      }, 100);
+    });
+
+    scanArea.addEventListener('touchend', function(e) {
+      clearTimeout(longPressTimer);
+    });
+
+    scanArea.addEventListener('touchcancel', function(e) {
+      clearTimeout(longPressTimer);
+    });
+  </script>
+</body>
+</html>
